@@ -31,13 +31,12 @@ function [centroid_x, centroid_y, axis_major_length, axis_minor_length, axis_rat
         
         % Sort by eigenvalue magnitude
         [eigenvals, idx] = sort(eigenvals, 'descend');
-        eigenvecs = eigenvecs(:, idx);
         
         % Ellipse parameters
         major_axis = 2 * sqrt(eigenvals(1)); % major axis
         minor_axis = 2 * sqrt(eigenvals(2)); % minor axis
-        orientation_radians = atan2(eigenvecs(2,1), eigenvecs(1,1));
-        orientation_degrees = rad2deg(orientation_radians);  % FIX: Was deg2rad (incorrect conversion)
+        orientation_radians = 0.5 * atan2(2*mu11, mu20 - mu02);
+        orientation_degrees = rad2deg(orientation_radians);
         axis_ratio_minor_to_major = minor_axis / major_axis;
         axis_major_length = major_axis;
         axis_minor_length = minor_axis;

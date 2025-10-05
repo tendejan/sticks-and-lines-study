@@ -41,7 +41,6 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
     all_props_filled = cell(num_images, 1);
     all_props_moments = cell(num_images, 1);
     all_names = cell(num_images, 1);
-    all_region_counts = cell(num_images, 1);
     
     % Setup progress tracking with DataQueue
     progress_queue = parallel.pool.DataQueue;
@@ -75,10 +74,6 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
             threshold = 0;
             img_binary = img > threshold;
             
-            % Count regions for reference
-            properties = regionprops(img_binary, 'Area');
-            num_regions = length(properties);
-            all_region_counts{i} = num_regions;
             
             % Method 1: Convex Hull
             [cx1, cy1, maj1, min1, ratio1, rad1, deg1] = fit_ellipse_conv_hull(img_binary);
@@ -112,7 +107,6 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
             all_props_filled{i} = [];
             all_props_moments{i} = [];
             all_names{i} = image_names{i};
-            all_region_counts{i} = 0;
             send(progress_queue, i); % Still count failed attempts
             continue;
         end
@@ -130,6 +124,15 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
     for m = 1:length(methods)
         results_table = table();
         results_table.image = all_names;
+
+        % Pre-allocate all numeric columns
+        results_table.centroid_x = nan(num_images, 1);
+        results_table.centroid_y = nan(num_images, 1);
+        results_table.axis_major_length = nan(num_images, 1);
+        results_table.axis_minor_length = nan(num_images, 1);
+        results_table.axis_ratio_minor_to_major = nan(num_images, 1);
+        results_table.orientation_radians = nan(num_images, 1);
+        results_table.orientation_degrees = nan(num_images, 1);
         
         for i = 1:num_images
             if ~isempty(props_data{m}{i})
@@ -141,7 +144,6 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
                 results_table.axis_ratio_minor_to_major(i) = props.axis_ratio_minor_to_major;
                 results_table.orientation_radians(i) = props.orientation_radians;
                 results_table.orientation_degrees(i) = props.orientation_degrees;
-                results_table.num_regions(i) = all_region_counts{i};
             else
                 % Handle failed processing or no regions found
                 results_table.centroid_x(i) = NaN;
@@ -151,7 +153,6 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
                 results_table.axis_ratio_minor_to_major(i) = NaN;
                 results_table.orientation_radians(i) = NaN;
                 results_table.orientation_degrees(i) = NaN;
-                results_table.num_regions(i) = all_region_counts{i};
             end
         end
         
