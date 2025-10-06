@@ -15,7 +15,11 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
             valid_names{end+1} = current_file.name;
         end
     end
-    
+
+    % Sort to preserve indexing
+    [valid_names, sort_idx] = sort(valid_names);
+    valid_files = valid_files(sort_idx);
+        
     % Convert to proper arrays
     num_images = length(valid_files);
     image_paths = valid_files'; % Convert to column cell array

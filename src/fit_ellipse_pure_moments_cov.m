@@ -1,46 +1,54 @@
 function [centroid_x, centroid_y, axis_major_length, axis_minor_length, axis_ratio_minor_to_major, orientation_radians, orientation_degrees] = fit_ellipse_pure_moments_cov(binary_image)
-    assert(islogical(binary_image), 'fit_ellipse_pure_moments_cov:TypeError', 'input image must be type of Logical');
-    
+     assert(islogical(binary_image), 'fit_ellipse_pure_moments_cov:TypeError', 'input image must be type of Logical');
     % Initialize outputs
-    centroid_x = NaN;
-    centroid_y = NaN;
-    axis_major_length = NaN;
-    axis_minor_length = NaN;
-    axis_ratio_minor_to_major = NaN;
-    orientation_radians = NaN;
-    orientation_degrees = NaN;
-    
-    [rows, cols] = find(binary_image);
-    
+     centroid_x = NaN;
+     centroid_y = NaN;
+     axis_major_length = NaN;
+     axis_minor_length = NaN;
+     axis_ratio_minor_to_major = NaN;
+     orientation_radians = NaN;
+     orientation_degrees = NaN;
+     [rows, cols] = find(binary_image);
     % Fit an ellipse using the 2nd moments of the image's convex hull
-    if ~isempty(rows)
+        if ~isempty(rows)
         % Calculate centroid
-        x_center = mean(cols);
-        y_center = mean(rows);
-        mu20 = sum((cols - x_center).^2);
-        mu02 = sum((rows - y_center).^2);
-        mu11 = sum((cols - x_center) .* (rows - y_center));
-        
+         x_center = mean(cols);
+         y_center = mean(rows);
+         mu20 = sum((cols - x_center).^2);
+         mu02 = sum((rows - y_center).^2);
+         mu11 = sum((cols - x_center) .* (rows - y_center));
         % Form the covariance matrix (normalized by number of points)
-        n = length(cols);
-        cov_matrix = [mu20/n, mu11/n; mu11/n, mu02/n];
-        
+         n = length(cols);
+         cov_matrix = [mu20/n, mu11/n; mu11/n, mu02/n];
         % Get eigenvalues and eigenvectors
-        [eigenvecs, eigenvals] = eig(cov_matrix);
-        eigenvals = diag(eigenvals);
-        
+         [eigenvecs, eigenvals] = eig(cov_matrix);
+         eigenvals = diag(eigenvals);
         % Sort by eigenvalue magnitude
-        [eigenvals, idx] = sort(eigenvals, 'descend');
-        
+         [eigenvals, idx] = sort(eigenvals, 'descend');
         % Ellipse parameters
-        major_axis = 2 * sqrt(eigenvals(1)); % major axis
-        minor_axis = 2 * sqrt(eigenvals(2)); % minor axis
-        orientation_radians = 0.5 * atan2(2*mu11, mu20 - mu02);
-        orientation_degrees = rad2deg(orientation_radians);
-        axis_ratio_minor_to_major = minor_axis / major_axis;
-        axis_major_length = major_axis;
-        axis_minor_length = minor_axis;
-        centroid_x = x_center;
-        centroid_y = y_center;
-    end
+         major_axis = 2 * sqrt(eigenvals(1)); % major axis
+         minor_axis = 2 * sqrt(eigenvals(2)); % minor axis
+         
+         % MODIFIED: Use regionprops-compatible angle calculation
+         % atan2 gives angle in standard math convention (CCW from +x axis)
+         % Range: -90 to +90 degrees (matching regionprops)
+         % negate the mu11 to agree with regionprops convention
+         orientation_radians_temp = 0.5 * atan2(-2*mu11, mu20 - mu02);
+         orientation_degrees = rad2deg(orientation_radians_temp);
+         
+         % Ensure angle is in [-90, 90] range (regionprops convention)
+             if orientation_degrees > 90
+                 orientation_degrees = orientation_degrees - 180;
+             elseif orientation_degrees < -90
+                 orientation_degrees = orientation_degrees + 180;
+             end
+         
+         orientation_radians = deg2rad(orientation_degrees);
+         
+         axis_ratio_minor_to_major = minor_axis / major_axis;
+         axis_major_length = major_axis;
+         axis_minor_length = minor_axis;
+         centroid_x = x_center;
+         centroid_y = y_center;
+        end
 end
