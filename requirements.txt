@@ -24,7 +24,7 @@ matplotlib-inline==0.1.7
 moderngl==5.12.0
 moderngl-window==3.1.1
 nest-asyncio==1.6.0
-novel-toy-tools @ git+https://github.com/tendejan/novel-toy-tools.git@a3039b75c1277e9ffa4e7c3013d2b093db9d43d4
+novel-toy-tools @ git+https://github.com/tendejan/novel-toy-tools.git@main
 numpy==2.0.2
 opencv-python==4.12.0.88
 packaging==25.0

@@ -1,4 +1,6 @@
-ROOT_DIR = "../data/null_datasets";
+% ROOT_DIR = "../data/null_datasets";
+
+ROOT_DIR = "../data/experimental_datasets";
 
 % Get all items in root directory
 all_items = dir(ROOT_DIR);
