@@ -1,5 +1,5 @@
 {
-  "name": "My Python Dev Container",
+  "name": "Sticks and Lines Development Container",
   "build": {
     "dockerfile": "Dockerfile"
   },
