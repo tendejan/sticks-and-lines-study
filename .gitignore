@@ -1,3 +1,5 @@
 data
 __pycache__
 lib
+*.asv
+*.DS_Store
