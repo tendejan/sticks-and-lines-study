@@ -127,6 +127,16 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
     
     for m = 1:length(methods)
         results_table = table();
+        
+        % Create KIDID_FrameKey by removing file extension from image names
+        kid_idframekey = cell(num_images, 1);
+        for i = 1:num_images
+            [~, name_no_ext, ~] = fileparts(all_names{i});
+            kid_idframekey{i} = name_no_ext;
+        end
+        
+        % Add KIDID_FrameKey as the first column
+        results_table.KID_IDFrameKey = kid_idframekey;
         results_table.image = all_names;
 
         % Pre-allocate all numeric columns
@@ -161,8 +171,8 @@ function simple_region_props(rendition_directory, out_csv_base_path, file_ext)
         end
         
         % Generate output path with method name
-        [path, name, ext] = fileparts(OUT_PATH_BASE);
-        out_path = fullfile(path, sprintf('%s_%s%s', name, methods{m}, ext));
+        [path, name, ~] = fileparts(OUT_PATH_BASE);
+        out_path = fullfile(path, sprintf('%s/fit_ellipse_%s.csv', name, methods{m}));
         
         % Save to CSV
         writetable(results_table, out_path);
