@@ -3,3 +3,4 @@ __pycache__
 lib
 *.asv
 *.DS_Store
+.DS_Store
